@@ -23,7 +23,8 @@ Step 3 : composer require spatie/laravel-permission
                 ];
 
 Step 4 : composer require jenssegers/agent
-Step 5 : "autoload": {
+Step 5 : composer require intervention/image
+Step 6 : "autoload": {
           "psr-4": {
             ...
            },
@@ -31,7 +32,7 @@ Step 5 : "autoload": {
         },
 
         Run composer dump-autoload
-Step 6 : php artisan install:api
+Step 7 : php artisan install:api
 
 Final Step :
 After Copying All Fine

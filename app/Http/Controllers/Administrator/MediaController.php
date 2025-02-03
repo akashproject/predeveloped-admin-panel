@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Media;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
-use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class MediaController extends Controller
 {
@@ -61,7 +62,6 @@ class MediaController extends Controller
                 'size' => number_format((float)($request->file->getSize()/1024), 2, '.', ''),
                 'path' => config('constant.relativeMediaPath').'/'.$today,
             );
-
             
             $fileName = $this->rename(str_replace(" ","-",strtolower($request->file->getClientOriginalName())));
             
@@ -72,11 +72,12 @@ class MediaController extends Controller
 
             $imageType = array("jpeg","png","jpg","jfif","webp");
             if(in_array($fileDataArray['extension'], $imageType)){
-                $image = Image::read($fileData->getRealPath());
+                $manager = new ImageManager(new Driver());
+                $image = $manager->read($fileData->getRealPath());
                 $dimension = $image->width().'x'.$image->height();
-                if($image->width() >= 768){
-                    $this->resizeMobile('profile',$fileName,$request);
-                }
+                // if($image->width() >= 768){
+                //     $this->resizeMobile('profile',$fileName,$request);
+                // }
                 $image->resize(120, 120)->save(public_path('upload/'.date("Y-m-d")).'/'."thumb_".$fileName);
             }
 
@@ -107,10 +108,12 @@ class MediaController extends Controller
 
     public function resizeMobile($profile,$fileName,$request){
         $config = config('constant.imageSize.'.$profile);
-        $image = Image::make($request->file('file')->getRealPath());
+
+        $manager = new ImageManager(new Driver());
+        $image = $manager->create($request->file('file')->getRealPath());
         $width = (768 * $image->width()/1920);
         
-        $image->resize($width, $width, function ($constraint) {
+        Image::resize($width, $width, function ($constraint) {
             $constraint->aspectRatio();
         })->save(public_path('upload/'.date("Y-m-d")).'/'."mobile_".$fileName);
     }
